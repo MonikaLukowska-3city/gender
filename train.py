@@ -12,6 +12,10 @@ from sklearn.model_selection import train_test_split
 from sklearn.tree import DecisionTreeClassifier, plot_tree
 from sklearn import metrics
 
+from sklearn.pipeline import make_pipeline
+from sklearn.preprocessing import StandardScaler
+from sklearn.svm import SVC
+
 warnings.filterwarnings("ignore")
 #https://github.com/SuperKogito/Voice-based-gender-recognition  ??
 
@@ -102,7 +106,7 @@ print("TRAIN")
 feature_names = [col for col in gender_df.columns]
 feature_names = feature_names[:-1]
 
-train, test = train_test_split(gender_df, test_size = 0.4, random_state = 42)
+train, test = train_test_split(gender_df, test_size = 0.4, random_state = 50)
 
 X_train = train[feature_names]
 y_train = train['y']
@@ -115,6 +119,13 @@ mod_dt.fit(X_train,y_train)
 prediction = mod_dt.predict(X_test)
 print('The accuracy of the Decision Tree is',"{:.3f}".format(metrics.accuracy_score(prediction, y_test)))
 
+mod_svc = make_pipeline(StandardScaler(), SVC(gamma='auto', kernel='rbf', random_state = 50))
+mod_svc.fit(X_train, y_train)
+prediction = mod_svc.predict(X_test)
+print('The accuracy of the SVC is',"{:.3f}".format(metrics.accuracy_score(prediction, y_test)))
+
+
+model_to_save = mod_svc
 
 #=================================================================================================
 print("SAVE MODEL")
@@ -123,7 +134,7 @@ prefix_time = datetime.now().strftime("%H%M%S")
 
 picklefile = f"\\{prefix_day}-{prefix_time}-model.bin"
 filehandler = open(dirname+picklefile, 'wb')
-pickle.dump(mod_dt, filehandler)
+pickle.dump(model_to_save, filehandler)
 
 
 #=================================================================================================
